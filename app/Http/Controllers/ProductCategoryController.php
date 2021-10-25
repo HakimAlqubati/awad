@@ -12,10 +12,27 @@ class ProductCategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-         $data = ProductCategory::get();
-         return $data;
+        $this->request = $request;
+        
+        $data = ProductCategory::where(function ($query) {
+            if ($this->request->code && $this->request->id) {
+                return $query->where([
+                    ['code', '=', $this->request->code],
+                    ['id', '=', $this->request->id]
+                ]);
+            } elseif ($this->request->id) {
+                return $query->where([
+                    ['id', '=', $this->request->id]
+                ]);
+            } elseif ($this->request->code) {
+                return $query->where([
+                    ['code', '=', $this->request->code]
+                ]);
+            }
+        })->get();
+        return $data;
     }
 
     /**

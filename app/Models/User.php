@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 
-  class User extends \TCG\Voyager\Models\User
+class User extends \TCG\Voyager\Models\User
 {
     use  HasApiTokens, HasFactory, Notifiable;
 
@@ -43,7 +43,8 @@ use Laravel\Passport\HasApiTokens;
         'email_verified_at' => 'datetime',
     ];
 
-    public function has() {
+    public function has()
+    {
         return $this->hasMany(Branch::class);
     }
 }

@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\Order;
 use App\Models\OrderDetails;
+use App\Models\RequestState;
 use App\Models\UnitPrice;
+use App\Models\User;
 use Facade\FlareClient\Http\Response;
 use Illuminate\Http\Request;
 use stdClass;
@@ -16,11 +19,75 @@ class OrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $this->request = $request;
+
+        $orders = Order::where(
+            function ($query) {
+                if (
+                    $this->request->id &&
+                    $this->request->created_by &&
+                    $this->request->request_state_id &&
+                    $this->request->restricted_state_id &&
+                    $this->request->branch_id
+                ) {
+                    return  $query->where(
+                        [
+                            ['id', '=', $this->request->id],
+                            ['created_by', '=', $this->request->created_by],
+                            ['request_state_id', '=', $this->request->request_state_id],
+                            ['restricted_state_id', '=', $this->request->restricted_state_id],
+                            ['branch_id', '=', $this->request->branch_id],
+                        ]
+                    );
+                } elseif (
+                    $this->request->id &&
+                    $this->request->created_by &&
+                    $this->request->request_state_id &&
+                    $this->request->restricted_state_id
+                ) {
+                    return  $query->where(
+                        [
+                            ['id', '=', $this->request->id],
+                            ['created_by', '=', $this->request->created_by],
+                            ['request_state_id', '=', $this->request->request_state_id],
+                            ['restricted_state_id', '=', $this->request->restricted_state_id]
+                        ]
+                    );
+                }
+            }
+        )->get();
+        if (count($orders) > 0) {
+            foreach ($orders as $key => $value) {
+
+                $obj = new stdClass();
+                $obj->id = $value->id;
+                $obj->desc = $value->desc;
+                $obj->created_by = $value->created_by;
+                $obj->created_by_user_name = $this->getUserDataById($value->created_by)[0]->name;
+                $obj->request_state_id = $value->request_state_id;
+                $obj->request_state_name = RequestState::where('id', $value->request_state_id)->get()[0]->name;
+                $obj->restricted_state_id = $value->restricted_state_id;
+                $obj->restricted_state_name = RequestState::where('id', $value->restricted_state_id)->get()[0]->name;
+                $obj->branch_id = $value->branch_id;
+                if ($value->branch_id != 0) {
+                    $obj->branch_name =  Branch::where('id', $value->branch_id)->get()[0]->name;
+                }
+                $obj->created_at = $value->created_at;
+                $obj->updated_at = $value->updated_at;
+                $array[] = $obj;
+            }
+            return $array;
+        } else {
+            return  [];
+        }
     }
 
+    public function getUserDataById($id)
+    {
+        return User::where('id', $id)->get();
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -39,6 +106,9 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $currentRole =  $request->user()->role_id;
+        $branch = Branch::where('manager_id', $request->user()->id)->get();
+
+
         if ($currentRole == 3 || $currentRole == 1) {
             $data =  $this->getUnitPriceData($request->product_id, $request->unit);
             foreach ($request->all() as   $value) {
@@ -48,7 +118,8 @@ class OrderController extends Controller
                         'request_state_id' => 2,
                         'desc' => $value['desc'],
                         'created_by' => $request->user()->id,
-                        'restricted_state_id' => 6
+                        'restricted_state_id' => 6,
+                        'branch_id' => $branch[0]->id
                     ]
                 );
                 $order->save();
@@ -96,7 +167,7 @@ class OrderController extends Controller
         )->get();
     }
 
-    
+
     /**
      * Display the specified resource.
      *
@@ -128,7 +199,35 @@ class OrderController extends Controller
      */
     public function update(Request $request, Order $order)
     {
-        //
+
+
+        $current_role = $request->user()->role_id;
+
+
+        if ($current_role == 1 || $current_role == 4) {
+
+            $order = Order::find($request->order_id);
+            $order->request_state_id = $request->request_state_id;
+            $update =  $order->save();
+            if ($update == 1) {
+                $obj = new stdClass();
+                $obj->res = "success";
+                $obj->msg = "Order no " . $order->id . " has been updated ";
+                $result[] = $obj;
+            } else {
+                $obj = new stdClass();
+                $obj->res = "faild";
+                $obj->msg = "there is some errors";
+                $result[] = $obj;
+            }
+        } else {
+            $obj = new stdClass();
+            $obj->res = "error";
+            $obj->msg = "you are not authrozied";
+            $result[] = $obj;
+        }
+
+        return $result;
     }
 
     /**

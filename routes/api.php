@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UnitPriceController;
@@ -20,11 +21,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:api'])->group(function () {
     Route::post('/add-order', [OrderController::class, 'store']);
+    Route::patch('/update-order', [OrderController::class, 'update']);
+    Route::get('/get-order', [OrderController::class, 'index']);
     Route::get('get-units', [UnitController::class, 'index']);
     Route::get('/get-unit-prices', [UnitPriceController::class, 'index']);
     Route::get('/products',  [ProductController::class, 'index']);
+    Route::get('/get-product-categories', [ProductCategoryController::class, 'index']);
 });
-
 
 
 

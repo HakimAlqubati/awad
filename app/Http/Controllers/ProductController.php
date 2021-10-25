@@ -6,6 +6,8 @@ use App\Models\Product;
 use App\Models\UnitPrice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use stdClass;
+use App\Models\Unit;
 
 class ProductController extends Controller
 {
@@ -20,6 +22,7 @@ class ProductController extends Controller
 
 
         $this->request = $request;
+
 
         $data = Product::with('unitPrices')->where(function ($query) {
 
@@ -45,8 +48,37 @@ class ProductController extends Controller
             }
         })->get();
 
+        foreach ($data as   $value) {
+            $obj = new stdClass();
+            $obj->id = $value->id;
+            $obj->name = $value->name;
+            $obj->desc = $value->desc;
+            $obj->cat_id = $value->cat_id;
+            $obj->code = $value->code;
+            $obj->active = $value->active;
+            $obj->created_at = $value->created_at;
+            $obj->updated_at = $value->updated_at;
+            $obj->unitPrices = $this->getProductUnitPrices($value->id);
+            $result[] = $obj;
+        }
+        return $result;
+    }
 
-        return $data;
+    public function getProductUnitPrices($productId)
+    {
+        $unitPrices =  UnitPrice::where('product_id', $productId)->get();
+        foreach ($unitPrices as $key => $value) {
+            $obj = new stdClass();
+            $obj->id = $value->id;
+            $obj->unit_id = $value->unit_id;
+            $obj->unit_name = Unit::where('id', $value->unit_id)->get()[0]->name;
+            $obj->product_id = $value->product_id;
+            $obj->product_name = Product::where('id', $value->product_id)->get()[0]->name;
+            $obj->price = $value->price;
+            $result[] = $obj;
+        }
+
+        return $result;
     }
 
     /**
