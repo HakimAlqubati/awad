@@ -18,12 +18,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth:api'])->group(function () {
+//Route::middleware(['auth:api'])->group(function () {
     Route::post('/add-order', [OrderController::class, 'store']);
     Route::get('get-units', [UnitController::class, 'index']);
     Route::get('/get-unit-prices', [UnitPriceController::class, 'index']);
     Route::get('/products',  [ProductController::class, 'index']);
-});
+//});
 
 
 
