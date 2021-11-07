@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UnitPriceController;
+use App\Models\Device;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 // use App\Http\Controllers\Voyager\OrderController;
@@ -37,5 +38,14 @@ Route::get('/get-pdf/{id}', [OrderController::class, 'createPDF']);
 // Route::post('/login',[LoginController::class,'login'] );
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
+       Device::UpdateOrCreate(
+        [
+            "user_id" => $request->user()->id,
+        ],
+        [
+            "name" => $request->header('name'),
+            "token" => $request->header('device_token')
+        ]
+    );
     return $request->user();
 });
