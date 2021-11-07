@@ -467,53 +467,69 @@ class UnitPriceController extends VoyagerBaseController
      */
     public function store(Request $request)
     {
-        $unitPrice = new UnitPrice(
-            [
 
-                'product_id' => $request->product_id,
-                'unit_id' =>  $request->unit_id,
-                'price' =>  $request->price
-            ]
-        );
-        $save =   $unitPrice->save();
+        $getProductUnitPriceToValidate = UnitPrice::where([
+            ['product_id', '=', $request->product_id],
+            ['unit_id', '=', $request->unit_id]
+        ])->get();
 
-        if ($save == 1) {
-            $redirect = redirect()->back();
+        $redirect = redirect()->back();
 
+        if (count($getProductUnitPriceToValidate) > 0) {
             return $redirect->with([
-                'message'    => "Done",
-                'alert-type' => 'success',
-            ]);
-        }
-
-
-        $slug = $this->getSlug($request);
-
-        $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
-
-        // Check permission
-        $this->authorize('add', app($dataType->model_name));
-
-        // Validate fields with ajax
-        $val = $this->validateBread($request->all(), $dataType->addRows)->validate();
-        $data = $this->insertUpdateData($request, $slug, $dataType->addRows, new $dataType->model_name());
-
-        event(new BreadDataAdded($dataType, $data));
-
-        if (!$request->has('_tagging')) {
-            if (auth()->user()->can('browse', $data)) {
-                $redirect = redirect()->route("voyager.{$dataType->slug}.index");
-            } else {
-                $redirect = redirect()->back();
-            }
-
-            return $redirect->with([
-                'message'    => __('voyager::generic.successfully_added_new') . " {$dataType->getTranslatedAttribute('display_name_singular')}",
-                'alert-type' => 'success',
+                'message'    => "Duplicate value",
+                'alert-type' => 'error',
             ]);
         } else {
-            return response()->json(['success' => true, 'data' => $data]);
+            $unitPrice = new UnitPrice(
+                [
+                    'product_id' => $request->product_id,
+                    'unit_id' =>  $request->unit_id,
+                    'price' =>  $request->price
+                ]
+            );
+            $save =   $unitPrice->save();
+
+            if ($save == 1) {
+
+
+                return $redirect->with([
+                    'message'    => "Done",
+                    'alert-type' => 'success',
+                ]);
+            }
         }
+
+
+
+
+        // $slug = $this->getSlug($request);
+
+        // $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
+
+        // Check permission
+        // $this->authorize('add', app($dataType->model_name));
+
+        // Validate fields with ajax
+        // $val = $this->validateBread($request->all(), $dataType->addRows)->validate();
+        // $data = $this->insertUpdateData($request, $slug, $dataType->addRows, new $dataType->model_name());
+
+        // event(new BreadDataAdded($dataType, $data));
+
+        // if (!$request->has('_tagging')) {
+        //     if (auth()->user()->can('browse', $data)) {
+        //         $redirect = redirect()->route("voyager.{$dataType->slug}.index");
+        //     } else {
+        //         $redirect = redirect()->back();
+        //     }
+
+        //     return $redirect->with([
+        //         'message'    => __('voyager::generic.successfully_added_new') . " {$dataType->getTranslatedAttribute('display_name_singular')}",
+        //         'alert-type' => 'success',
+        //     ]);
+        // } else {
+        //     return response()->json(['success' => true, 'data' => $data]);
+        // }
     }
 
     //***************************************

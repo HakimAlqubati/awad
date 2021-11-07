@@ -36,6 +36,11 @@
                     class="hidden-xs hidden-sm">{{ __('voyager::generic.return_to_list') }}</span>
             </a>
         @endcan
+
+        <a href="{{ url('/get-pdf/' . $dataTypeContent->getKey() . '') }}" class="btn btn-success">
+            <i class="glyphicon glyphicon-file"></i> <span class="export-to-pdf">Export to pdf</span>
+        </a>
+
     </h1>
     @include('voyager::multilingual.language-selector')
 @stop
@@ -54,27 +59,38 @@
                         <div class="row">
 
                             <div class="col-md-3">
-                                <h4> Order ID : #{{ $order[0]->id }} </h4>
+                                <h4> Order ID : #{{ $finalResultOrder[0]->id }} </h4>
+                            </div>
+
+
+                            <div class="col-md-3">
+                                <h4> Date : {{ $finalResultOrder[0]->created_at }} </h4>
                             </div>
 
                             <div class="col-md-3">
-                                <h4> Created by : {{ $order[0]->created_by }} </h4>
+                                <h4> Order state : {{ $finalResultOrder[0]->request_state_name }} </h4>
                             </div>
                             <div class="col-md-3">
-                                <h4> Date : {{ $order[0]->created_at }} </h4>
-                            </div>
-
-                            <div class="col-md-3">
-                                <h4> Order state : {{ $order[0]->request_state_id }} </h4>
+                                <h4> ({{ $finalResultOrder[0]->restricted_state_name }}) </h4>
                             </div>
 
 
                         </div>
 
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h4> Created by : {{ $finalResultOrder[0]->user_name }} </h4>
+                            </div>
+
+                            <div class="col-md-4">
+                                <h4> Manager of branch : {{ $finalResultOrder[0]->branch_name }} </h4>
+                            </div>
+                        </div>
+
                         <h4> Details: </h4>
                         <div class="row">
                             <div class="col-md-12">
-                                <p> {{ $order[0]->desc }} </p>
+                                <p> {{ $finalResultOrder[0]->desc }} </p>
                             </div>
                         </div>
 
@@ -145,6 +161,9 @@
             });
         </script>
     @endif
+    <script src="{{ asset('js/app.js') }}" type="text/js"></script>
+
+
     <script>
         var deleteFormAction;
         $('.delete').on('click', function(e) {

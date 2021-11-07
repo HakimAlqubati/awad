@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\NotificationOrderController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
@@ -7,7 +9,7 @@ use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UnitPriceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+// use App\Http\Controllers\Voyager\OrderController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -21,16 +23,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:api'])->group(function () {
     Route::post('/add-order', [OrderController::class, 'store']);
-    Route::patch('/update-order', [OrderController::class, 'update']);
+    Route::put('/update-order', [OrderController::class, 'update']);
     Route::get('/get-order', [OrderController::class, 'index']);
     Route::get('get-units', [UnitController::class, 'index']);
     Route::get('/get-unit-prices', [UnitPriceController::class, 'index']);
     Route::get('/products',  [ProductController::class, 'index']);
     Route::get('/get-product-categories', [ProductCategoryController::class, 'index']);
+    Route::get('/get-notification-orders', [NotificationOrderController::class, 'index']);
 });
 
+Route::get('/get-pdf/{id}', [OrderController::class, 'createPDF']);
 
-
+// Route::post('/login',[LoginController::class,'login'] );
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

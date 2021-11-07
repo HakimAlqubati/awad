@@ -28,7 +28,7 @@ $add = is_null($dataTypeContent->getKey());
 
                 <div class="panel panel-bordered">
                     <!-- form start -->
-                   
+
                     <div class="container">
                         <form action="{{ url('update-order', [$dataTypeContent->getKey()]) }}" method="POST">
                             {{ method_field('PUT') }}
@@ -42,11 +42,13 @@ $add = is_null($dataTypeContent->getKey());
 
                                 <div class="col-md-4">
                                     Order state :
-                                    <select class="form-select" name="request_state_id" aria-label="Default select example" style=" 
-                                                                                                    height: 33px;
-                                                                                                    border-radius: 5px;
-                                                                                                    width: 250px;
-                                                                                                    text-align: center;">
+                                    <select class="form-select" name="request_state_id"
+                                        aria-label="Default select example"
+                                        style=" 
+                                                                                                                            height: 33px;
+                                                                                                                            border-radius: 5px;
+                                                                                                                            width: 250px;
+                                                                                                                            text-align: center;">
                                         <?php foreach ($requestStates as   $value) {
                                          
                                        ?>
@@ -80,11 +82,13 @@ $add = is_null($dataTypeContent->getKey());
                                 <div class="col-md-4">
                                     Restrected :
 
-                                    <select class="form-select" name="restricted_state_id" aria-label="Default select example" style="
-                                                                                                    height: 33px;
-                                                                                                    border-radius: 5px;
-                                                                                                    width: 250px;
-                                                                                                    text-align: center;">
+                                    <select class="form-select" name="restricted_state_id"
+                                        aria-label="Default select example"
+                                        style="
+                                                                                                                            height: 33px;
+                                                                                                                            border-radius: 5px;
+                                                                                                                            width: 250px;
+                                                                                                                            text-align: center;">
 
                                         <?php foreach ($destrectedStates as   $value) {
                                               ?>
@@ -102,17 +106,44 @@ $add = is_null($dataTypeContent->getKey());
 
 
                                 <div class="form-group">
-                                    <label for="details">Details : </label>
+                                    <label for="details">Notes : </label>
                                     <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" readonly>
-                                                                            <?php echo $arrayOrder['desc']; ?>
+                                                                                                    <?php echo $arrayOrder['desc']; ?>
 
-                                                                        </textarea>
+                                                                                                </textarea>
                                 </div>
 
                             </div>
 
+                            <!-- Start order details -->
+
+                            <?php foreach ($orderDetailsForEdit as $key => $value) {  ?>
+                            <div class="row">
+
+                                <div class="col-md-2">
+                                    Product :
+                                    <input type="hidden" value='<?php echo $value->product_id; ?>'>
+                                    <input type="text" class="form-control" value='<?php echo $value->product_name; ?>' readonly>
+                                </div>
+
+
+
+                                
+                                <div class="col-md-2">
+                                    Product :
+                                    <input type="hidden" value='<?php echo $value->product_id; ?>'>
+                                    <input type="text" class="form-control" value='<?php echo $value->product_name; ?>' readonly>
+                                </div>
+
+
+
+
+                            </div>
+                            <?php } ?>
+
+                            <!-- End order details  -->
                             <div class="row" style="text-align: center;">
-                                <input type="submit" class="btn btn-primary" value="Save"  style="width: 200px"/>
+                                <input type="submit" class="btn btn-primary" value="Save" style="width: 200px" />
                             </div>
 
                         </form>

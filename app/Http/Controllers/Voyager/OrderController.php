@@ -2,6 +2,7 @@
 
 namespace  App\Http\Controllers\Voyager;
 
+use App\Models\Branch;
 use App\Models\Order;
 use App\Models\OrderDetails;
 use App\Models\Product;
@@ -22,7 +23,10 @@ use TCG\Voyager\Http\Controllers\Traits\BreadRelationshipParser;
 use TCG\Voyager\Http\Controllers\VoyagerBaseController;
 use App\Models\Unit;
 use App\Models\User;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use stdClass;
+use PDF;
 
 class OrderController extends  VoyagerBaseController
 {
@@ -226,7 +230,7 @@ class OrderController extends  VoyagerBaseController
     {
 
 
-       
+
         $slug = $this->getSlug($request);
 
         $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
@@ -275,10 +279,27 @@ class OrderController extends  VoyagerBaseController
         }
 
         $order = Order::where('id', $id)->get();
+
+        foreach ($order as   $val) {
+            $obj = new stdClass();
+            $obj->id = $val->id;
+            $obj->desc =  $val->desc;
+            $obj->branch_id = $val->branch_id;
+            $obj->branch_name =  Branch::where('id', $val->branch_id)->get()[0]->name;
+            $obj->created_at = $val->created_at;
+            $obj->request_state_id = $val->request_state_id;
+            $obj->request_state_name = $this->getStateNameById($val->request_state_id)[0]->name;
+            $obj->restricted_state_name =    $this->getStateNameById($val->restricted_state_id)[0]->name;;;
+            $obj->created_by  = $val->created_by;
+            $obj->user_name  =  User::where('id', $val->created_by)->get()[0]->name;;
+            $finalResultOrder[] = $obj;
+        }
+
         $orderDetails = OrderDetails::where('order_id', $order[0]->id)->get();
 
         foreach ($orderDetails as $key => $value) {
             $obj = new stdClass();
+
             $obj->product_id = $value->product_id;
             $obj->product_name = $this->getProductProductNameById($value->product_id)[0]->name;
             $obj->unit_id = $value->product_unit_id;
@@ -295,7 +316,7 @@ class OrderController extends  VoyagerBaseController
             'isModelTranslatable',
             'isSoftDeleted',
             'finalResult',
-            'order'
+            'finalResultOrder'
         ));
     }
 
@@ -391,7 +412,27 @@ class OrderController extends  VoyagerBaseController
         $requestStates = RequestState::whereIn('id', array(2, 3, 4, 5))->get();
         $destrectedStates = RequestState::whereIn('id', array(6, 7))->get();
 
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'arrayOrder', 'requestStates', 'destrectedStates'));
+        $orderDetails =  OrderDetails::where('order_id', $id)->get();
+        foreach ($orderDetails as $key => $value) {
+            $obj = new stdClass();
+            $obj->product_id = $value->product_id;
+            $obj->product_name = $this->getProductProductNameById($value->product_id)[0]->name;
+            $obj->unit_id = $value->product_unit_id;
+            $obj->unit_name = $this->getUnitNameById($value->product_unit_id)[0]->name;
+            $obj->price =  $value->price;
+            $obj->qty = $value->qty;
+            $orderDetailsForEdit[] = $obj;
+        }
+      dd($orderDetailsForEdit);
+        return Voyager::view($view, compact(
+            'dataType',
+            'dataTypeContent',
+            'isModelTranslatable',
+            'arrayOrder',
+            'requestStates',
+            'destrectedStates',
+            'orderDetailsForEdit'
+        ));
     }
 
     // POST BR(E)AD
@@ -404,7 +445,7 @@ class OrderController extends  VoyagerBaseController
         $order->restricted_state_id =    $request->restricted_state_id;
 
         $update =  $order->save();
-     
+
         if ($update == 1) {
             $redirect = redirect()->back();
 
@@ -1076,5 +1117,63 @@ class OrderController extends  VoyagerBaseController
     protected function relationIsUsingAccessorAsLabel($details)
     {
         return in_array($details->label, app($details->model)->additional_attributes ?? []);
+    }
+
+    // Generate PDF
+    public function createPDF(Request $request, $id)
+    {
+        // retreive all records from db
+
+        $order = Order::where('id', $id)->get();
+        $orderDetails = OrderDetails::where('order_id', $order[0]->id)->get();
+
+        $objOrder = new stdClass();
+        $objOrder->orderId = $order[0]->id;
+        $objOrder->createdBy = $order[0]->created_by;
+        $objOrder->createdByUserName =  User::where('id', $order[0]->created_by)->get()[0]->name;
+        $objOrder->createdAt = $order[0]->created_at;
+        $objOrder->stateId = $order[0]->request_state_id;
+        $objOrder->state_name =  $this->getStateNameById($order[0]->request_state_id)[0]->name;;
+        $objOrder->restricted_state_name =  $this->getStateNameById($order[0]->restricted_state_id)[0]->name;;
+        $objOrder->desc = $order[0]->desc;
+        $objOrder->branch_id = $order[0]->branch_id;
+        $objOrder->branch_name =  Branch::where('id', $order[0]->branch_id)->get()[0]->name;
+        $objOrder->manager_name = User::where('role_id', 4)->get()[0]->name;
+
+
+
+        $finalResult[] = $objOrder;
+        foreach ($orderDetails as $key => $value) {
+            $obj = new stdClass();
+            $obj->product_id = $value->product_id;
+            $obj->product_name = $this->getProductProductNameById($value->product_id)[0]->name;
+            $obj->unit_id = $value->product_unit_id;
+            $obj->unit_name = $this->getUnitNameById($value->product_unit_id)[0]->name;
+            $obj->price =  $value->price;
+            $obj->qty = $value->qty;
+            array_push($finalResult, $obj);
+        }
+
+
+        return view('vendor.voyager.orders.pdf_view', compact('finalResult'));
+        // share data to view
+        // view()->share('vendor.voyager.orders.pdf_view', $finalResult);
+        $pdf = PDF::loadView('vendor.voyager.orders.pdf_view', ['finalResult' => $finalResult]);
+
+        $content = $pdf->download()->getOriginalContent();
+
+        $down =    Storage::put('public/pdf_files/order-no' . $order[0]->id . '.pdf', $content);
+
+        if ($down == 1) {
+
+
+            return Redirect::back()->with([
+                'message'    => "done download successfully",
+                'alert-type' => 'success',
+            ]);
+        }
+        return $down;
+        // download PDF file with download method
+        // return $pdf->download('pdf_file.pdf');
     }
 }

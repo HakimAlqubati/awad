@@ -104,9 +104,7 @@ $add = is_null($dataTypeContent->getKey());
                                     Price :
 
                                     <input type="text" name="price" class="form-control" <?php if($edit){ ?>
-                                        value='<?php echo $unitPrice[0]->price; ?>' <?php }?> placeholder="Price"
-                                        
-                                        required>
+                                        value='<?php echo $unitPrice[0]->price; ?>' <?php }?> placeholder="Price" required>
                                 </div>
 
 
