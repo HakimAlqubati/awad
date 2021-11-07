@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Models\UnitPrice;
 use Illuminate\Http\Request;
+use stdClass;
+use App\Models\Unit;
 
 class UnitPriceController extends Controller
 {
@@ -40,7 +43,22 @@ class UnitPriceController extends Controller
             }
         })->get();
 
-        return $data;
+        foreach ($data as $key => $value) {
+            $obj = new stdClass();
+            $obj->id = $value->id;
+            $obj->unit_id = $value->unit_id;
+            $obj->unit_name = Unit::where('id', $value->unit_id)->get()[0]->name;
+            $obj->product_id = $value->product_id;
+            $obj->product_name = Product::where('id', $value->product_id)->get()[0]->name;
+            $obj->price = $value->price;
+            $obj->created_at = $value->created_at;
+            $obj->updated_at = $value->updated_at;
+            $result[] = $obj;
+        }
+
+
+
+        return $result;
     }
 
     /**
