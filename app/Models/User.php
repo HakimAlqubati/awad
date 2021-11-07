@@ -47,4 +47,9 @@ class User extends \TCG\Voyager\Models\User
     {
         return $this->hasMany(Branch::class);
     }
+ 
+    public function device()
+    {
+        return $this->hasOne(Device::class);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\FcmNotificationJob;
 use App\Models\Branch;
 use App\Models\NotificationOrder;
 use App\Models\Order;
@@ -135,6 +136,17 @@ class OrderController extends Controller
     {
         $currentRole =  $request->user()->role_id;
         $branch = Branch::where('manager_id', $request->user()->id)->first();
+
+        FcmNotificationJob::dispatchNow("1","2",$branch);
+        // DispatchNow not run in Background but Can you change  To dispath after Test or Complated code 
+        // one parameter 1 change to title 
+        // tow parameter 2 change to body 
+        // php artisan queue: work queue== fcm-notification
+
+        //after change to dispatch write in terminal  php artisan queue:work --queue=fcm-notification  
+
+
+
 
         if ($currentRole == 3 || $currentRole == 1) {
             $data =  $this->getUnitPriceData($request->product_id, $request->unit);
