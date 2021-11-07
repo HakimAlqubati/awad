@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//Route::middleware(['auth:api'])->group(function () {
+Route::middleware(['auth:api'])->group(function () {
     Route::post('/add-order', [OrderController::class, 'store']);
     Route::put('/update-order', [OrderController::class, 'update']);
     Route::get('/get-order', [OrderController::class, 'index']);
