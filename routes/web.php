@@ -3,8 +3,8 @@
 use App\Http\Controllers\Voyager\OrderController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Voyager\UnitPriceController;
- 
- use Illuminate\Support\Facades\File;
+use App\Http\Controllers\Voyager\UserController;
+use Illuminate\Support\Facades\File;
  use Illuminate\Support\Facades\Response;
 
 /*
@@ -19,7 +19,14 @@ use App\Http\Controllers\Voyager\UnitPriceController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    // return view('welcome');
+    return redirect('admin/login');
+
+});
+Route::get('/admin', function () {
+    // return view('welcome');
+    return redirect('admin/orders');
+
 });
 
 
@@ -27,6 +34,10 @@ Route::put('/update-order/{id}', [OrderController::class, 'update']);
 Route::put('/update-unit-price/{id}', [UnitPriceController::class, 'update']);
 Route::post('/add-unit-price', [UnitPriceController::class, 'store']);
 Route::get('/get-pdf/{id}', [OrderController::class, 'createPDF']);
+
+Route::post('/add-user', [UserController::class, 'store']);
+Route::put('/update-user/{id}', [UserController::class, 'update']);
+
 
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();

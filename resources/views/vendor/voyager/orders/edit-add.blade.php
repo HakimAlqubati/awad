@@ -15,8 +15,8 @@ $add = is_null($dataTypeContent->getKey());
 
 @section('page_header')
     <h1 class="page-title">
-        <i class="{{ $dataType->icon }}"></i>
-        {{ __('voyager::generic.' . ($edit ? 'edit' : 'add')) . ' ' . $dataType->getTranslatedAttribute('display_name_singular') }}
+         Fulfil order
+        
     </h1>
     @include('voyager::multilingual.language-selector')
 @stop
@@ -45,10 +45,10 @@ $add = is_null($dataTypeContent->getKey());
                                     <select class="form-select" name="request_state_id"
                                         aria-label="Default select example"
                                         style=" 
-                                                                                                                            height: 33px;
-                                                                                                                            border-radius: 5px;
-                                                                                                                            width: 250px;
-                                                                                                                            text-align: center;">
+                                                                                                                                            height: 33px;
+                                                                                                                                            border-radius: 5px;
+                                                                                                                                            width: 250px;
+                                                                                                                                            text-align: center;">
                                         <?php foreach ($requestStates as   $value) {
                                          
                                        ?>
@@ -85,10 +85,10 @@ $add = is_null($dataTypeContent->getKey());
                                     <select class="form-select" name="restricted_state_id"
                                         aria-label="Default select example"
                                         style="
-                                                                                                                            height: 33px;
-                                                                                                                            border-radius: 5px;
-                                                                                                                            width: 250px;
-                                                                                                                            text-align: center;">
+                                                                                                                                            height: 33px;
+                                                                                                                                            border-radius: 5px;
+                                                                                                                                            width: 250px;
+                                                                                                                                            text-align: center;">
 
                                         <?php foreach ($destrectedStates as   $value) {
                                               ?>
@@ -108,9 +108,9 @@ $add = is_null($dataTypeContent->getKey());
                                 <div class="form-group">
                                     <label for="details">Notes : </label>
                                     <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" readonly>
-                                                                                                    <?php echo $arrayOrder['desc']; ?>
+                                                                                                                    <?php echo $arrayOrder['desc']; ?>
 
-                                                                                                </textarea>
+                                                                                                                </textarea>
                                 </div>
 
                             </div>
@@ -118,21 +118,30 @@ $add = is_null($dataTypeContent->getKey());
                             <!-- Start order details -->
 
                             <?php foreach ($orderDetailsForEdit as $key => $value) {  ?>
+                            <input type="hidden" name="order_detail_id[]" value='<?php echo $value->order_detail_id; ?>'>
                             <div class="row">
 
                                 <div class="col-md-2">
                                     Product :
-                                    <input type="hidden" value='<?php echo $value->product_id; ?>'>
+
                                     <input type="text" class="form-control" value='<?php echo $value->product_name; ?>' readonly>
                                 </div>
 
 
 
-                                
+
                                 <div class="col-md-2">
-                                    Product :
-                                    <input type="hidden" value='<?php echo $value->product_id; ?>'>
-                                    <input type="text" class="form-control" value='<?php echo $value->product_name; ?>' readonly>
+                                    Unit :
+
+                                    <input type="text" class="form-control" value='<?php echo $value->unit_name; ?>' readonly>
+                                </div>
+
+
+                                <div class="col-md-2">
+                                    Quantity :
+
+                                    <input type="text" name="qty[]" class="form-control"
+                                        value='<?php echo $value->qty; ?>'>
                                 </div>
 
 
