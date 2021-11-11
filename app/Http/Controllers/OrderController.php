@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use stdClass;
 use PDF;
 use App\Models\Unit;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 
 class OrderController extends Controller
@@ -185,6 +186,7 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
+        return DB::transaction(function () use ($request) {
         $currentRole =  $request->user()->role_id;
         $currentUser = $request->user();
         $branch = Branch::where('manager_id', $currentUser->id)->first();
@@ -244,6 +246,7 @@ class OrderController extends Controller
 
             return $obj;
         }
+    });
     }
 
     public function getUnitPriceData($product_id, $unit_id)
@@ -292,8 +295,7 @@ class OrderController extends Controller
      */
     public function update(Request $request, Order $order)
     {
-
-
+        return DB::transaction(function () use ($request,$order) {
         $current_role = $request->user()->role_id;
 
 
@@ -425,6 +427,7 @@ class OrderController extends Controller
         }
 
         return $obj;
+        });
     }
 
     /**
