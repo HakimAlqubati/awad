@@ -498,7 +498,7 @@ class UserController extends VoyagerBaseController
     {
 
 
-
+        // dd($request->all());
 
         $redirect = redirect()->back();
         $user = new User(

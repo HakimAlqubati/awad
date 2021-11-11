@@ -44,10 +44,10 @@ class FcmNotificationJob implements ShouldQueue
     {
         
       if($this->user  instanceof User){
-        $this->device_token=$this->user->device;
+        $this->device_token=$this->user->device->token;
       }
       else if ($this->user  instanceof Branch){
-        $this->device_token=$this->user->manager->device;
+        $this->device_token=$this->user->manager->device->token;
       } 
         $toToken = "cDnVLR-mQpW4cmqNU5lt00:APA91bF4GKimgE3-5HCmY3p-gOYLO9Cn7sWbC0W3mPMGcitU9nzy4XlGtb4nGL4J7ulC7zBiWtfUDzz7tYffQJHljyUG19T2EcjXfWEMxkImXmAjol3eF0a0fp-q31t8T0yaK6Darwib";
         //$serverKey = env("TOKEN_FCM");
@@ -67,7 +67,7 @@ class FcmNotificationJob implements ShouldQueue
                 ],
             ],
         );
-        dd($response->json());
+        
         return $response->json() ;
     }
 }

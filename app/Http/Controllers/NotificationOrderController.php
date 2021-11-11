@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\NotificationOrder;
 use Illuminate\Http\Request;
 use stdClass;
+use TCG\Voyager\Models\User;
 
 class NotificationOrderController extends Controller
 {
@@ -44,7 +45,9 @@ class NotificationOrderController extends Controller
                 $obj = new stdClass();
                 $obj->id = $value->id;
                 $obj->sender_id = $value->sender_id;
+                $obj->sender_name = User::where('id', $value->sender_id)->first()->name;
                 $obj->reciver_id = $value->reciver_id;
+                $obj->reciver_name =  User::where('id', $value->reciver_id)->first()->name;
                 $obj->order_id = $value->order_id;
                 $obj->title = $value->title;
                 $obj->body = $value->body;

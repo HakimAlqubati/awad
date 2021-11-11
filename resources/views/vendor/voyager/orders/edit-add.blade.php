@@ -15,8 +15,8 @@ $add = is_null($dataTypeContent->getKey());
 
 @section('page_header')
     <h1 class="page-title">
-         Fulfil order
-        
+        Fulfil order
+
     </h1>
     @include('voyager::multilingual.language-selector')
 @stop
@@ -45,10 +45,10 @@ $add = is_null($dataTypeContent->getKey());
                                     <select class="form-select" name="request_state_id"
                                         aria-label="Default select example"
                                         style=" 
-                                                                                                                                            height: 33px;
-                                                                                                                                            border-radius: 5px;
-                                                                                                                                            width: 250px;
-                                                                                                                                            text-align: center;">
+                                                                                                                                                                                                        height: 33px;
+                                                                                                                                                                                                        border-radius: 5px;
+                                                                                                                                                                                                        width: 250px;
+                                                                                                                                                                                                        text-align: center;">
                                         <?php foreach ($requestStates as   $value) {
                                          
                                        ?>
@@ -80,24 +80,21 @@ $add = is_null($dataTypeContent->getKey());
 
 
                                 <div class="col-md-4">
-                                    Restrected :
+                                    Recorded state:
 
-                                    <select class="form-select" name="restricted_state_id"
-                                        aria-label="Default select example"
-                                        style="
-                                                                                                                                            height: 33px;
-                                                                                                                                            border-radius: 5px;
-                                                                                                                                            width: 250px;
-                                                                                                                                            text-align: center;">
+
+                                    <select id="formSelect" class="form-select" name="restricted_state_id"
+                                        aria-label="Default select example">
 
                                         <?php foreach ($destrectedStates as   $value) {
-                                              ?>
+                                          ?>
                                         <?php if($arrayOrder['restricted_state_id'] == $value->id ) { ?>
                                         <option value="<?php echo $value->id; ?>" selected> <?php echo $value->name; ?> </option>
                                         <?php }else{ ?>
                                         <option value="<?php echo $value->id; ?>"> <?php echo $value->name; ?> </option>
                                         <?php }  }?>
                                     </select>
+
 
                                 </div>
 
@@ -108,9 +105,9 @@ $add = is_null($dataTypeContent->getKey());
                                 <div class="form-group">
                                     <label for="details">Notes : </label>
                                     <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" readonly>
-                                                                                                                    <?php echo $arrayOrder['desc']; ?>
+                                                                                                                                                                                <?php echo $arrayOrder['desc']; ?>
 
-                                                                                                                </textarea>
+                                                                                                                                                                            </textarea>
                                 </div>
 
                             </div>
@@ -140,8 +137,20 @@ $add = is_null($dataTypeContent->getKey());
                                 <div class="col-md-2">
                                     Quantity :
 
-                                    <input type="text" name="qty[]" class="form-control"
-                                        value='<?php echo $value->qty; ?>'>
+                                    <?php    if (Auth::user()->role_id == 5) { ?>
+                                    <input type="text" name="qty[]" class="form-control" value='<?php echo $value->qty; ?>'
+                                        readonly>
+
+                                    <?php }else{ ?>
+                                    <input type="text" name="qty[]" class="form-control" value='<?php echo $value->qty; ?>'>
+                                    <?php } ?>
+                                </div>
+                                
+                                <div class="col-md-2">
+                                    Price :
+
+                                    <input type="text"   class="form-control" value='<?php echo $value->price; ?>'
+                                        readonly>
                                 </div>
 
 
@@ -270,3 +279,13 @@ $add = is_null($dataTypeContent->getKey());
         });
     </script>
 @stop
+
+<style>
+    #formSelect {
+        height: 33px;
+        border-radius: 5px;
+        width: 250px;
+        text-align: center;
+    }
+
+</style>

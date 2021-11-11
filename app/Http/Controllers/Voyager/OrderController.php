@@ -425,7 +425,7 @@ class OrderController extends  VoyagerBaseController
             $obj->qty = $value->qty;
             $orderDetailsForEdit[] = $obj;
         }
-        return Voyager::view($view, compact(
+         return Voyager::view($view, compact(
             'dataType',
             'dataTypeContent',
             'isModelTranslatable',

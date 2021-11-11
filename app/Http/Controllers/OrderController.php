@@ -38,7 +38,8 @@ class OrderController extends Controller
                     $this->request->created_by &&
                     $this->request->request_state_id &&
                     $this->request->restricted_state_id &&
-                    $this->request->branch_id
+                    $this->request->branch_id &&
+                    $this->request->order_id
                 ) {
                     return  $query->where(
                         [
@@ -47,6 +48,7 @@ class OrderController extends Controller
                             ['request_state_id', '=', $this->request->request_state_id],
                             ['restricted_state_id', '=', $this->request->restricted_state_id],
                             ['branch_id', '=', $this->request->branch_id],
+                            ['id', '=', $this->request->order_id],
                         ]
                     );
                 } elseif (
@@ -61,15 +63,34 @@ class OrderController extends Controller
                         ]
                     );
                 } elseif (
-
                     $this->request->created_by
-
                 ) {
                     return  $query->where(
                         [
-
                             ['created_by', '=', $this->request->created_by],
-
+                        ]
+                    );
+                } elseif (
+                    $this->request->order_id
+                ) {
+                    return  $query->where(
+                        [
+                            ['id', '=', $this->request->order_id],
+                        ]
+                    );
+                
+                  
+	 
+                } elseif (
+                    $this->request->order_id&&
+                    $this->request->created_by&&
+                    $this->request->request_state_id
+                ) {
+                    return  $query->where(
+                        [
+                            ['id', '=', $this->request->order_id],
+                            ['created_by', '=', $this->request->created_by],
+                            ['request_state_id', '=', $this->request->request_state_id],
                         ]
                     );
                 }
@@ -95,6 +116,7 @@ class OrderController extends Controller
                 }
                 $obj->created_at = $value->created_at;
                 $obj->updated_at = $value->updated_at;
+                $obj->total_price = $this->getOrderDetailsTotalPrice($value->id);
                 $obj->order_details = $this->getOrderDetailsByOrderId($value->id);
                 $array[] = $obj;
             }
@@ -107,11 +129,40 @@ class OrderController extends Controller
     {
         $data = OrderDetails::where('order_id', $id)->get();
         $totalPrice = 0;
+        $fresult = array();
+        foreach ($data as $key => $value) {
+            $obj = new stdClass();
+            $obj->id = $value->id;
+            $obj->order_id = $value->order_id;
+            $obj->qty = $value->qty;
+            $obj->price = $value->price;
+            $obj->product_unit_id = $value->product_unit_id;
+            $obj->product_unit_name =   $this->getUnitNameById($value->product_unit_id)[0]->name;
+            $obj->product_id = $value->product_id;
+            $obj->product_name = $this->getProductProductNameById($value->product_id)[0]->name;
+            $fresult[] = $obj;
+
+            $price = $value->price;
+            $totalPrice += $price;
+        }
+
+
+        return $fresult;
+    }
+
+
+    public function getOrderDetailsTotalPrice($id)
+    {
+        $data = OrderDetails::where('order_id', $id)->get();
+        $totalPrice = 0;
+
         foreach ($data as $key => $value) {
             $price = $value->price;
             $totalPrice += $price;
         }
-        return $totalPrice;
+
+
+        return  $totalPrice;
     }
     public function getUserDataById($id)
     {
@@ -135,9 +186,12 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $currentRole =  $request->user()->role_id;
-        $branch = Branch::where('manager_id', $request->user()->id)->first();
+        $currentUser = $request->user();
+        $branch = Branch::where('manager_id', $currentUser->id)->first();
+        $storeManager = User::where('id', 3)->first();
 
-        FcmNotificationJob::dispatchNow("1","2",$branch);
+        FcmNotificationJob::dispatchNow("New Order", "Order from " . $currentUser->name .
+            " Manager of branch " .  $branch->name, $branch);
         // DispatchNow not run in Background but Can you change  To dispath after Test or Complated code 
         // one parameter 1 change to title 
         // tow parameter 2 change to body 
@@ -203,7 +257,7 @@ class OrderController extends Controller
                     'unit_id', '=', $unit_id
                 ]
             ]
-        )->get();
+        )->first();
     }
 
 
